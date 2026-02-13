@@ -1,23 +1,37 @@
-from random import random, randint
+from random import random
 
 
 TEXT_AREA = {
+    # Словарь для формирования текста
     0: None,
     1: "голова",
     2: "тело",
     3: "ноги"
 }
 
-ATTR_HP    = {1: 'hp_head', 2: 'hp_body', 3: 'hp_legs'}
-ATTR_ARMOR = {1: 'helmet', 2: 'chestplate', 3: 'greaves'}
+# Словари для функций *attr()
+ATTR_HP = {
+    1: 'hp_head',
+    2: 'hp_body',
+    3: 'hp_legs'
+}
+ATTR_ARMOR = {
+    1: 'helmet',
+    2: 'chestplate',
+    3: 'greaves'
+}
 
 
 def calc_hp(player: Player) -> int:
-    '''Возвращает общее состояние (`hp`) игрока, подсчитывая медиану здоровья головы, тела и ног'''
+    '''Возвращает общее состояние (`hp`) игрока, подсчитывая медиану здоровья головы, тела и ног.'''
     return player.hp_head + player.hp_body + player.hp_legs - min(player.hp_head, player.hp_body, player.hp_legs) - max(player.hp_head, player.hp_body, player.hp_legs)
 
 
 class Weapon:
+    '''
+    Класс оружия. Выдаётся игроку (`class Player`).
+    Увеличивает минимальный наносимый урон, шанс нанести крит. и увеличивает минимальный наносимый крит. урон.
+    '''
     def __init__(self, name: str, bonus_damage: int, bonus_crit_chance: float, bonus_crit_damage: float) -> None:
         self.name: str = name
         self.bonus_damage: int = bonus_damage
@@ -25,6 +39,11 @@ class Weapon:
         self.bonus_crit_damage: float = bonus_crit_damage
 
 class Armor:
+    '''
+    Класс брони. Выдаётся игроку (`class Player`).
+    Понижает получаемый урон.
+    Суммируется с щитом (`Player.shield`).
+    '''
     def __init__(self, name: str, helmet: int = 7, chestplate: int = 15, greaves: int = 7) -> None:
         self.name = name
         self.helmet = helmet
@@ -49,7 +68,7 @@ class Player:
         self.crit_damage = crit_damage
 
     def crit(self) -> tuple[float, bool]:
-        '''Подсчитывает и возвращает критический урон, основываясь на изначальных значениях (`self.crit_chance`, `self.crit_damage`)'''
+        '''Подсчитывает и возвращает критический урон, основываясь на изначальных значениях (`self.crit_chance`, `self.crit_damage`).'''
         roll = random()
 
         if roll <= self.crit_chance:
@@ -59,12 +78,11 @@ class Player:
     
     def attack(self, enemy: Player, area: int) -> str:
         '''
-        Наносит урон противнику (`enemy`) с учётом крита
-        Вовзвращает string, который сразу можно вывести как итог удара
+        Наносит урон противнику (`enemy`) с учётом крита.
+        Возвращает string, который сразу можно вывести как итог удара.
         '''
         area_armor = ATTR_ARMOR[area]
         area_hp = ATTR_HP[area]
-
         crit, crit_val = self.crit()
         
         if crit_val:
@@ -72,22 +90,28 @@ class Player:
         else:
             crit_str = ""
 
-        damage = int(self.damage * crit - getattr(enemy.armor, area_armor))
+        damage = int(self.damage * crit - getattr(enemy.armor, area_armor)) # урон * крит. урон - сила брони противника (в этой области)
         text = f"{self.name} нанес {enemy.name} {damage} ед. {crit_str}урона в {TEXT_AREA[area]}"
 
         if area == enemy.shield_area:
+            # Если зона удара совпадает с зоной где у противника стоит щит, то отнять от значения урона значение силы щита противника
             damage -= enemy.shield
             text += " (защита)"
 
-        setattr(enemy, area_hp, getattr(enemy, area_hp) - damage)
+        setattr(enemy, area_hp, getattr(enemy, area_hp) - damage) # Отнять здоровье в размере урона (damage) у области куда был совершён удар
         enemy.hp = calc_hp(enemy)
 
         return f"{text}\n"
 
     def defense(self, shield_area: int) -> None:
+        '''`self.shield_area = shield_area`'''
         self.shield_area = shield_area
 
+
 # ТЕСТИРОВАНИЕ
+from random import randint
+
+
 Chainmail = Armor("Кольчуга", chestplate=10, greaves=4)
 
 Claymore = Weapon("Клеймор", 10, 0.1, 1.1)
