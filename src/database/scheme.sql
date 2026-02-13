@@ -7,10 +7,10 @@ CREATE TABLE IF NOT EXISTS "game" (
     "p1_name" TEXT,
     "p2_name" TEXT,
     -- 0 - нет действия, 1 - голова, 2 - корпус, 3 - ноги
-    "p1_attack" INTEGER DEFAULT 0,
-    "p2_attack" INTEGER DEFAULT 0,
-    "p1_defense" INTEGER DEFAULT 0,
-    "p2_defense" INTEGER DEFAULT 0
+    "p1_damage_area" INTEGER DEFAULT 0,
+    "p2_damage_area" INTEGER DEFAULT 0,
+    "p1_defense_area" INTEGER DEFAULT 0,
+    "p2_defense_area" INTEGER DEFAULT 0
 );
 
 COMMIT;
