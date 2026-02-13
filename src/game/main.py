@@ -9,9 +9,9 @@ class Weapon:
         self.bonus_сrit_damage: int = bonus_сrit_damage
 
 class Player:
-    def __init__(self, is_bot: bool, name: str, hp: int, damage: int, armor: int, crit_chance: float, сrit_damage: float, weapon: Weapon):
-        self.is_bot: bool = is_bot
+    def __init__(self, name: str, is_bot: bool, hp: int, damage: int, armor: int, crit_chance: float, сrit_damage: float, weapon: Weapon):
         self.name: str = name
+        self.is_bot: bool = is_bot
         self.hp: int = hp
         self.damage: int = damage + weapon.bonus_damage
         self.armor: int = armor
@@ -44,8 +44,8 @@ class Player:
 Claymore = Weapon("Клеймор", 10, 0.1, 1.1)
 Stiletto = Weapon("Стилет", 7, 0.4, 0.4)
 
-Timur = Player("Тимурджан", 100, 15, 3, 0.30, 2.0, Claymore)
-Gaine = Player("Генджел", 100, 10, 5, 0.35, 1.9, Stiletto)
+Timur = Player("Тимурджан", False, 100, 15, 3, 0.30, 2.0, Claymore)
+Gaine = Player("Генджел", False, 100, 10, 5, 0.35, 1.9, Stiletto)
 
 
 while True:

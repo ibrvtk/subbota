@@ -22,7 +22,7 @@ async def db_create_database() -> None:
     except Exception as e:
         print(f"error: database: db_create_database(): {e}")
 
-async def db_create(player_1: Player, player_2: Player):
+async def db_create(player_1: Player, player_2: Player) -> None:
     id = ''.join(choices(ascii_lowercase + digits, k=6))
 
     try:
@@ -33,11 +33,11 @@ async def db_create(player_1: Player, player_2: Player):
     except Exception as e:
         print(f"error: database: db_create(): {e}")
 
-async def db_read(arg, sql_select: str = '*', sql_where: str = 'id', arg_and = None, sql_and: str = None, check_exist: bool = False) -> tuple | int| str | bool | None:
+async def db_read(arg, sql_select: str = '*', sql_where: str = 'id', arg_and = None, sql_and: str = None, check_exist: bool = False) -> tuple | int | str | bool | None:
     '''
-    `SELECT {sql_select} FROM game WHERE {sql_where} = ?{sql_and_params}`
-    `sql_and_params = f" AND {sql_and} = ?"`
-    `params = (arg, arg_and)`
+    `SELECT {sql_select} FROM game WHERE {sql_where} = ?{sql_and_params}`  
+    `sql_and_params = f" AND {sql_and} = ?"`  
+    `params = (arg, arg_and)`  
     `*and*` будет только если соответствующие переменные были переданы. Иначе просто без них.
     '''
     if sql_select != '*' and sql_where != 'id' and check_exist:
@@ -78,9 +78,9 @@ async def db_read(arg, sql_select: str = '*', sql_where: str = 'id', arg_and = N
 
 async def db_update(arg_set, arg_where, sql_set: str, sql_where: str = 'id', arg_and = None, sql_and: str = None) -> None:
     '''
-    `UPDATE game SET {sql_set} = ? WHERE {sql_where} = ?{sql_and_params}`
-    `sql_and_params = f" AND {sql_and} = ?"`
-    `params = (arg_set, arg_where, arg_and)`
+    `UPDATE game SET {sql_set} = ? WHERE {sql_where} = ?{sql_and_params}`  
+    `sql_and_params = f" AND {sql_and} = ?"`  
+    `params = (arg_set, arg_where, arg_and)`  
     `*and*` будет только если соответствующие переменные были переданы. Иначе просто без них.
     '''
     if arg_and and not sql_and or not arg_and and sql_and:
