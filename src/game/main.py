@@ -1,12 +1,15 @@
 from random import random, randint
 
 
-DD_AREAS = {
+TEXT_AREA = {
     0: None,
     1: "голова",
     2: "тело",
     3: "ноги"
 }
+
+ATTR_HP    = {1: 'hp_head', 2: 'hp_body', 3: 'hp_legs'}
+ATTR_ARMOR = {1: 'helmet', 2: 'chestplate', 3: 'greaves'}
 
 
 def calc_hp(player: Player) -> int:
@@ -22,7 +25,7 @@ class Weapon:
         self.bonus_crit_damage: float = bonus_crit_damage
 
 class Armor:
-    def __init__(self, name: str, helmet: int, chestplate: int, greaves: int) -> None:
+    def __init__(self, name: str, helmet: int = 7, chestplate: int = 15, greaves: int = 7) -> None:
         self.name = name
         self.helmet = helmet
         self.chestplate = chestplate
@@ -31,19 +34,22 @@ class Armor:
 class Player:
     def __init__(self, name: str, weapon: Weapon, armor: Armor,
                  hp_head: int = 100, hp_body: int = 100, hp_legs: int = 100,
-                 damage: int = 10, crit_chance: float = 0.3, crit_damage = 2.0) -> None:
+                 defense: int = 7, damage: int = 10, crit_chance: float = 0.3, crit_damage = 2.0) -> None:
         self.name = name
         self.hp_head = hp_head
         self.hp_body = hp_body
         self.hp_legs = hp_legs
         self.hp = calc_hp(self)
+        self.shield = defense
         self.armor = armor
+        self.shield_area = 0
         self.damage = damage
         self.weapon = weapon
         self.crit_chance = crit_chance
         self.crit_damage = crit_damage
 
     def crit(self) -> tuple[float, bool]:
+        '''Подсчитывает и возвращает критический урон, основываясь на изначальных значениях (`self.crit_chance`, `self.crit_damage`)'''
         roll = random()
 
         if roll <= self.crit_chance:
@@ -52,6 +58,13 @@ class Player:
             return 1, False
     
     def attack(self, enemy: Player, area: int) -> str:
+        '''
+        Наносит урон противнику (`enemy`) с учётом крита
+        Вовзвращает string, который сразу можно вывести как итог удара
+        '''
+        area_armor = ATTR_ARMOR[area]
+        area_hp = ATTR_HP[area]
+
         crit, crit_val = self.crit()
         
         if crit_val:
@@ -59,24 +72,23 @@ class Player:
         else:
             crit_str = ""
 
-        damage = 0
-        match area:
-            case 1:
-                damage = int(self.damage * crit - enemy.armor.helmet)
-                enemy.hp_head -= damage
-            case 2:
-                damage = int(self.damage * crit - enemy.armor.chestplate)
-                enemy.hp_body -= damage
-            case 3:
-                damage = int(self.damage * crit - enemy.armor.greaves)
-                enemy.hp_legs -= damage
+        damage = int(self.damage * crit - getattr(enemy.armor, area_armor))
+        text = f"{self.name} нанес {enemy.name} {damage} ед. {crit_str}урона в {TEXT_AREA[area]}"
 
+        if area == enemy.shield_area:
+            damage -= enemy.shield
+            text += " (защита)"
+
+        setattr(enemy, area_hp, getattr(enemy, area_hp) - damage)
         enemy.hp = calc_hp(enemy)
 
-        return f"{self.name} нанес {enemy.name} {damage} ед. {crit_str}урона в {DD_AREAS[area]}\n"
+        return f"{text}\n"
+
+    def defense(self, shield_area: int) -> None:
+        self.shield_area = shield_area
 
 # ТЕСТИРОВАНИЕ
-Chainmail = Armor("Кольчуга", 7, 10, 4)
+Chainmail = Armor("Кольчуга", chestplate=10, greaves=4)
 
 Claymore = Weapon("Клеймор", 10, 0.1, 1.1)
 Stiletto = Weapon("Стилет", 7, 0.4, 0.4)
@@ -86,10 +98,12 @@ Gaine = Player("Генджел", Stiletto, Chainmail, crit_chance=0.35, crit_dam
 
 
 while True:
+    Timur.defense(randint(1, 3))
     print(Gaine.attack(Timur, randint(1, 3)))
     if Timur.hp <= 0:
         print(f"{Gaine.name} победилa!")
         break
+    Gaine.defense(randint(1, 3))
     print(Timur.attack(Gaine, randint(1, 3)))
     if Gaine.hp <= 0:
         print(f"{Timur.name} победил!")
