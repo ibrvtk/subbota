@@ -10,3 +10,6 @@ BOT = Bot(
     token=TOKEN,
     default=DefaultBotProperties(parse_mode='HTML')
 )
+
+DATABASE_DB=getenv('DATABASE_DB')
+DATABASE_SQL=getenv('DATABASE_SQL')

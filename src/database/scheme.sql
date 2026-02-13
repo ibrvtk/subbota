@@ -1,65 +1,16 @@
 BEGIN TRANSACTION;
 
--- All `*s_id` params are stored in the "id,id,id,...," format
--- All chat ids are include "-100" prefix
--- Usernames don't have the "UNIQUE" param, bc an error may occur
-
-CREATE TABLE IF NOT EXISTS "user" (
-    "id" INTEGER PRIMARY KEY,
-    "username" TEXT,
-    "emoji" TEXT DEFAULT "👤",
-    "registration_date" INTEGER, -- int(datetime.now().timestamp())
-    "language_code" TEXT DEFAULT "en",
-    "chats_id" TEXT,
-    "items_id" TEXT,
-    "stage" INTEGER DEFAULT 0,
-    "is_banned" INTEGER DEFAULT 0, -- -> boolean
-    "is_pro" INTEGER DEFAULT 0 -- -> boolean
-);
-
-CREATE TABLE IF NOT EXISTS "chat" (
-    "id" INTEGER PRIMARY KEY,
-    "username" TEXT,
-    "emoji" TEXT DEFAULT "👥",
-    "owner_id" INTEGER,
-    "prefix" TEXT DEFAULT "",
-    "language_code" TEXT DEFAULT "en",
-    "cooldown" INTEGER DEFAULT 5,
-    "is_banned" INTEGER DEFAULT 0, -- -> boolean
-    "is_pro" INTEGER DEFAULT 0 -- -> boolean
-);
-
-CREATE TABLE IF NOT EXISTS "stat" (
-    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-    "chat_id" INTEGER,
-    "user_id" INTEGER,
-    "admin_level" INTEGER DEFAULT 0,
-    "balance" INTEGER DEFAULT 0,
-    "bonus" INTEGER,
-    "secret_word" TEXT,
-    "wins" INTEGER DEFAULT 0,
-    "loses" INTEGER DEFAULT 0,
-    "balance_without_loses" INTEGER DEFAULT 0,
-    "last_play" INTEGER DEFAULT 0 -- int(datetime.now().timestamp())
-);
-
-CREATE TABLE IF NOT EXISTS "item" (
-    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-    "chat_id" INTEGER,
-    "name" TEXT,
-    "price" INTEGER,
-    "quantity" INTEGER DEFAULT -1,
-    "effect" TEXT,
-    "is_keepable" INTEGER DEFAULT 1, -- -> boolean
-    "is_sendable" INTEGER DEFAULT 1 -- -> boolean
-);
-
-CREATE TABLE IF NOT EXISTS "custom_role" (
-    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-    "chat_id" INTEGER,
-    "name" TEXT,
-    "emoji" TEXT DEFAULT "🔰",
-    "admin_level" INTEGER DEFAULT 0
+CREATE TABLE IF NOT EXISTS "game" (
+    "id" TEXT PRIMARY KEY,
+    "start_date" INTEGER, -- int(datetime.now().timestamp())
+    -- playerN_name (class Player self.name)
+    "p1_name" TEXT,
+    "p2_name" TEXT,
+    -- 0 - нет действия, 1 - голова, 2 - корпус, 3 - ноги
+    "p1_attack" INTEGER DEFAULT 0,
+    "p2_attack" INTEGER DEFAULT 0,
+    "p1_defense" INTEGER DEFAULT 0,
+    "p2_defense" INTEGER DEFAULT 0
 );
 
 COMMIT;
