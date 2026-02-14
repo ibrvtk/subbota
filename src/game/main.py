@@ -13,19 +13,14 @@ TEXT_ARMORELEMENT_TYPE = {
     'greaves': "поножи"
 }
 TEXT_PLAYER_PARAMS = {
-    'name': "Имя",
-    'hp_head': "Целостность головы",
-    'hp_body': "Целостность тела",
-    'hp_legs': "Целостность ног",
-    'hp': "Общее состояние здоровья",
-    'shield_power': "Прочность щита (поглощение урона от атаки)",
-    'shield_area': "Место на теле, защищаемое с помощью щита",
-    'armor': "Броня",
-    'damage': "Минимальный урон",
-    'weapon': "Оружие",
-    'crit_chance': "Шанс крит. удара",
-    'crit_damage': "Минимальный доп. урон при крит-е",
-    'points': "Очки прокачки"
+    'name': "имя",
+    'hp': "здоровье",
+    'damage': "минимальный урон",
+    'weapon': "оружие",
+    'shield_area': "положение щита",
+    'crit_chance': "шанс нанести крит. удар",
+    'crit_damage': "минимальный доп. урон при крит-е",
+    'exp': "опыт (очки прокачки)"
 }
 
 
@@ -132,7 +127,7 @@ class Entity:
         if not hasattr(self, param_to_upgrade):
             raise ValueError(f"Параметр {param_to_upgrade} не существует")
 
-        restricted = ['name', 'hp', 'shield_area', 'armor', 'weapon', 'crit_chance', 'crit_damage', 'points'] # Недоступные для улучшения параметры
+        restricted = ['name', 'weapon', 'helmet', 'chestplate', 'greaves', 'shield_area', 'crit_chance', 'exp'] # Недоступные для улучшения параметры
         if param_to_upgrade in restricted:
             return "Вы не можете изменить этот параметр!"
 
