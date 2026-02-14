@@ -39,14 +39,14 @@ ATTR_ARMOR = {
 }
 
 
-def calc_hp(player: Player) -> int:
+def calc_hp(player: Entity) -> int:
     '''Возвращает общее состояние (`hp`) игрока, подсчитывая медиану здоровья головы, тела и ног.'''
     return player.hp_head + player.hp_body + player.hp_legs - min(player.hp_head, player.hp_body, player.hp_legs) - max(player.hp_head, player.hp_body, player.hp_legs)
 
 
 class Weapon:
     '''
-    Класс оружия. Выдаётся игроку (`class Player`).
+    Класс оружия.
     Увеличивает минимальный наносимый урон, шанс нанести крит. и увеличивает минимальный наносимый крит. урон.
     '''
     def __init__(self, name: str, bonus_damage: int, bonus_crit_chance: float, bonus_crit_damage: float) -> None:
@@ -57,7 +57,7 @@ class Weapon:
 
 class Armor:
     '''
-    Класс брони. Выдаётся игроку (`class Player`).
+    Класс брони.
     Понижает получаемый урон.
     Суммируется с щитом (`Player.shield_power`).
     '''
@@ -67,11 +67,10 @@ class Armor:
         self.chestplate: int = chestplate
         self.greaves: int = greaves
 
-class Player:
-    '''Homo Sapiens Sapiens'''
+class Entity:
     def __init__(self, name: str, weapon: Weapon, armor: Armor,
                  hp_head: int = 100, hp_body: int = 100, hp_legs: int = 100,
-                 shield_power: int = 7, damage: int = 10, crit_chance: float = 0.3, crit_damage = 2.0) -> None:
+                 shield_power: int = 7, damage: int = 10, crit_chance: float = 0.3, crit_damage = 2.0, exp: int = 10) -> None:
         self.name: str = name
         self.hp_head: int = hp_head
         self.hp_body: int = hp_body
@@ -84,26 +83,26 @@ class Player:
         self.weapon: Weapon = weapon
         self.crit_chance: float = crit_chance
         self.crit_damage: float = crit_damage
-        self.points: int = 10
+        self.exp: int = exp
 
     def crit(self) -> tuple[float, bool]:
         '''Подсчитывает и возвращает критический урон, основываясь на изначальных значениях (`self.crit_chance`, `self.crit_damage`).'''
         roll = random()
 
         if roll <= self.crit_chance:
+            # Если выпавшее число меньше или равно базовому шансу, то возвращаем базовый крит. урон
             return self.crit_damage, True
         else:
             return 1, False
     
-    def attack(self, enemy: Player, area: int) -> str:
+    def attack(self, enemy: Entity, area: int) -> str:
         '''
         Наносит урон противнику (`enemy`) с учётом крита.
-        Возвращает string, который сразу можно вывести как итог удара.
         '''
         area_armor = ATTR_ARMOR[area]
         area_hp = ATTR_HP[area]
         crit, crit_val = self.crit()
-        
+
         if crit_val:
             crit_str = "крит. "
         else:
@@ -123,23 +122,31 @@ class Player:
         return f"{text}\n"
 
     def defense(self, shield_area: int) -> None:
-        '''`self.shield_area = shield_area`'''
+        '''
+        Выставляет щит (`Player.shield_area`) в указанную зону.
+        `self.shield_area = shield_area`
+        '''
         self.shield_area = shield_area
 
-    def upgrade(self, param_to_upgrade: str) -> str:
-        restricted = ['name', 'hp', 'shield_area', 'armor', 'weapon', 'crit_chance', 'crit_damage', 'points']
-
-        if param_to_upgrade in restricted:
-            return "Вы не можете изменить этот параметр!"
-
+    def upgrade(self, param_to_upgrade: str, free: bool = False) -> str:
+        '''
+        Прокачивает integer-параметр, например дамаг или кол-во здоровья (в определённой зоне).
+        Снимает Player.points -= 1, если free не равен True.
+        '''
         if not hasattr(self, param_to_upgrade):
             raise ValueError(f"Параметр {param_to_upgrade} не существует")
 
+        restricted = ['name', 'hp', 'shield_area', 'armor', 'weapon', 'crit_chance', 'crit_damage', 'points'] # Недоступные для улучшения параметры
+        if param_to_upgrade in restricted:
+            return "Вы не можете изменить этот параметр!"
+
+        # Берём текущее значение требуемого параметра; прибавляем единицу; устанавливаем новое значение в класс
         current_value = getattr(self, param_to_upgrade)
         new_value = current_value + 1
         setattr(self, param_to_upgrade, new_value)
 
-        self.points -= 1
+        if not free:
+            self.exp -= 1
 
         return f"Параметр \"{TEXT_PLAYER_PARAMS[param_to_upgrade]}\" увеличен до {new_value}"
 
@@ -155,14 +162,14 @@ Fists = Weapon("Кулаки", 0, 0.0, 0.0)
 Claymore = Weapon("Клеймор", 10, 0.1, 1.1)
 Stiletto = Weapon("Стилет", 7, 0.4, 0.4)
 
-Timur = Player("Тимурджан", Fists, Naked, damage=15)
-Diana = Player("Диана", Fists, Naked, crit_chance=0.35, crit_damage=1.9)
+Timur = Entity("Тимурджан", Fists, Naked, damage=15)
+Diana = Entity("Диана", Fists, Naked, crit_chance=0.35, crit_damage=1.9)
 
 
-while Timur.points != 0:
+while Timur.exp != 0:
     print(Timur.upgrade(choice(list(TEXT_PLAYER_PARAMS))))
 
-while Diana.points != 0:
+while Diana.exp != 0:
     print(Diana.upgrade(choice(list(TEXT_PLAYER_PARAMS))))
 
 while True:
